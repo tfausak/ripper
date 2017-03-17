@@ -12,13 +12,17 @@
       "sourceType": "module"
     },
     "rules": {
+      "consistent-return": "off",
       "indent": [
         "error",
         2
       ],
       "line-comment-position": "off",
+      "no-bitwise": "off",
       "no-console": "off",
+      "no-constant-condition": "off",
       "no-inline-comments": "off",
+      "no-magic-numbers": "off",
       "one-var": [
         "error",
         "never"
@@ -27,6 +31,10 @@
       "quote-props": [
         "error",
         "as-needed"
+      ],
+      "quotes": [
+        "error",
+        "single"
       ]
     }
   },
