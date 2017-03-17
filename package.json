@@ -1,0 +1,39 @@
+{
+  "devDependencies": {
+    "eslint": "3.17.1"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true
+    },
+    "extends": "eslint:all",
+    "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "module"
+    },
+    "rules": {
+      "indent": [
+        "error",
+        2
+      ],
+      "line-comment-position": "off",
+      "no-console": "off",
+      "no-inline-comments": "off",
+      "one-var": [
+        "error",
+        "never"
+      ],
+      "padded-blocks": "off",
+      "quote-props": [
+        "error",
+        "as-needed"
+      ]
+    }
+  },
+  "name": "ripper",
+  "private": true,
+  "scripts": {
+    "eslint": "eslint"
+  },
+  "version": "0.0.0"
+}
