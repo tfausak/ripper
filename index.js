@@ -29,7 +29,7 @@ const Parser = class {
 
     this.position += size;
 
-    return this.buffer.toString('latin1', start, end);
+    return this.buffer.toString('ascii', start, end);
   }
 
   getUint8le () {
