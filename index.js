@@ -162,10 +162,12 @@ const parseKeyFrame = (parser) => {
   };
 };
 
-// TODO
 const parseFrames = (parser) => {
   const size = parser.getUint32le();
 
+  if (size !== 0) {
+    throw new Error(`non-zero stream size ${size}`);
+  }
   parser.position += size;
 
   return [];
