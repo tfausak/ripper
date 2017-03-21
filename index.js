@@ -1,5 +1,15 @@
 const fs = require('fs');
 
+const normalizeSize = (rawSize) => {
+  if (rawSize === 0x05000000) {
+    return 8;
+  }
+
+  return rawSize;
+};
+
+const normalizeString = (rawString) => rawString.replace(/\0+/g, '');
+
 const Parser = class {
   constructor (buffer) {
     this.buffer = buffer;
@@ -23,13 +33,16 @@ const Parser = class {
   }
 
   getString () {
-    const size = this.getInt32le();
+    const rawSize = this.getInt32le();
+    const size = normalizeSize(rawSize);
     const start = this.position;
     const end = start + size - 1;
+    const rawResult = this.buffer.toString('ascii', start, end);
+    const result = normalizeString(rawResult);
 
     this.position += size;
 
-    return this.buffer.toString('ascii', start, end);
+    return result;
   }
 
   getUint8le () {
@@ -51,8 +64,9 @@ const Parser = class {
   getUint64le () {
     const upper = this.getUint32le();
     const lower = this.getUint32le();
+    const result = (upper << 8) + lower;
 
-    return (upper << 8) + lower;
+    return result;
   }
 };
 
@@ -83,6 +97,20 @@ const parseList = (parser, parseElement) => {
   return list;
 };
 
+const parseByteProperty = (parser) => {
+  let key = parser.getString();
+  let value = null;
+
+  if (key === 'OnlinePlatform_Steam') {
+    value = key;
+    key = 'OnlinePlatform';
+  } else {
+    value = parser.getString();
+  }
+
+  return {[key]: value};
+};
+
 const parseProperty = (parser) => {
   const type = parser.getString();
   const size = parser.getUint64le();
@@ -96,7 +124,7 @@ const parseProperty = (parser) => {
     value = parser.getUint8le();
     break;
   case 'ByteProperty':
-    value = {[parser.getString()]: parser.getString()};
+    value = parseByteProperty(parser);
     break;
   case 'FloatProperty':
     value = parser.getFloat32le();

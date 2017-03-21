@@ -19,10 +19,8 @@
         2
       ],
       "line-comment-position": "off",
-      "max-statements": [
-        "error",
-        11
-      ],
+      "max-lines": "off",
+      "max-statements": "off",
       "no-bitwise": "off",
       "no-console": "off",
       "no-constant-condition": "off",

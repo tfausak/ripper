@@ -14,4 +14,15 @@ mocha.describe('ripper', () => {
     ripper.main(event, callback);
   });
 
+  mocha.it('parses a replay with a messed up byte property', (callback) => {
+    const event = {
+      data: {
+        name: 'test/replays/6688EEE34BFEB3EC3A9E3283098CC712.replay',
+        resourceState: 'exists'
+      }
+    };
+
+    ripper.main(event, callback);
+  });
+
 });
