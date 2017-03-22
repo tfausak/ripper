@@ -1,5 +1,49 @@
 const fs = require('fs');
 
+const BitParser = class {
+  constructor (buffer, bytePosition) {
+    this.buffer = buffer;
+    this.bytePosition = bytePosition;
+    this.bitPosition = 0;
+  }
+
+  getBit () {
+    const byte = this.buffer[this.bytePosition];
+    const mask = 0b00000001 << this.bitPosition;
+    const bit = byte & mask;
+
+    this.bitPosition += 1;
+    if (this.bitPosition >= 8) {
+      this.bytePosition += 1;
+      this.bitPosition -= 8;
+    }
+
+    return bit !== 0;
+  }
+
+  getByte () {
+    return (
+      this.getBit() << 0 |
+      this.getBit() << 1 |
+      this.getBit() << 2 |
+      this.getBit() << 3 |
+      this.getBit() << 4 |
+      this.getBit() << 5 |
+      this.getBit() << 6 |
+      this.getBit() << 7
+    );
+  }
+
+  getFloat32le () {
+    return Buffer.from([
+      this.getByte(),
+      this.getByte(),
+      this.getByte(),
+      this.getByte()
+    ]).readFloatLE();
+  }
+};
+
 const normalizeSize = (rawSize) => {
   if (rawSize === 0x05000000) {
     return 8;
@@ -152,15 +196,15 @@ const parseProperty = (parser) => {
   };
 };
 
-const parseSection = (parser, parseBody) => {
+const parseSection = (parser, parseValue) => {
   const size = parser.getUint32le();
   const crc = parser.getUint32le();
-  const body = parseBody(parser);
+  const value = parseValue(parser);
 
   return {
-    body,
     crc,
-    size
+    size,
+    value
   };
 };
 
@@ -190,15 +234,31 @@ const parseKeyFrame = (parser) => {
   };
 };
 
-const parseFrames = (parser) => {
-  const size = parser.getUint32le();
+const parseFrame = (parser) => {
+  const time = parser.getFloat32le();
+  const delta = parser.getFloat32le();
+  // TODO
 
-  if (size !== 0) {
-    throw new Error(`non-zero stream size ${size}`);
+  return {
+    delta,
+    time
+  };
+};
+
+const parseFrames = (parser, numFrames) => {
+  const size = parser.getUint32le();
+  const bitParser = new BitParser(parser.buffer, parser.position);
+  const value = [];
+
+  for (let frame = 0; frame < numFrames; frame += 1) {
+    value.push(parseFrame(bitParser));
   }
   parser.position += size;
 
-  return [];
+  return {
+    size,
+    value
+  };
 };
 
 const parseMessage = (parser) => {
@@ -257,10 +317,10 @@ const parseCache = (parser) => {
   };
 };
 
-const parseContent = (parser) => {
+const parseContent = (parser, numFrames) => {
   const levels = parseList(parser, (it) => it.getString());
   const keyFrames = parseList(parser, parseKeyFrame);
-  const frames = parseFrames(parser);
+  const frames = parseFrames(parser, numFrames);
   const messages = parseList(parser, parseMessage);
   const marks = parseList(parser, parseMark);
   const packages = parseList(parser, (it) => it.getString());
@@ -285,7 +345,8 @@ const parseContent = (parser) => {
 
 const parseReplay = (parser) => {
   const header = parseSection(parser, parseHeader);
-  const content = parseSection(parser, parseContent);
+  const numFrames = (header.value.properties.NumFrames || {}).value || 0;
+  const content = parseSection(parser, (it) => parseContent(it, numFrames));
 
   return {
     content,

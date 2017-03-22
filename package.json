@@ -26,6 +26,7 @@
       "no-constant-condition": "off",
       "no-inline-comments": "off",
       "no-magic-numbers": "off",
+      "no-mixed-operators": "off",
       "one-var": [
         "error",
         "never"
