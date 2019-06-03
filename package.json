@@ -1,0 +1,18 @@
+{
+  "description": "Parse and generate Rocket League replays.",
+  "devDependencies": {
+    "eslint": "^5.16.0"
+  },
+  "engines": {
+    "node": "^12.3.1",
+    "npm": "^6.9.0"
+  },
+  "license": "ISC",
+  "name": "ripper",
+  "repository": "tfausak/ripper",
+  "scripts": {
+    "eslint": "eslint",
+    "test": "node test"
+  },
+  "version": "0.0.0"
+}
